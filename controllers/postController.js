@@ -44,7 +44,42 @@ const getPost = async (req, res) => {
   }
 };
 
+const createNewPost = async (req, res) => {
+  try {
+    const { title, content, user_id } = req.body;
+    // Will need to change user_id from a form input when working on the front end
+
+    if (!title || !content || !user_id) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Title, Content and User ID are required",
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO posts (title, content, user_id)
+        VALUES ($1, $2, $3) RETURNING *`,
+      [title, content, user_id]
+    );
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0],
+      message: "Post Created Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllPosts,
   getPost,
+  createNewPost,
 };
