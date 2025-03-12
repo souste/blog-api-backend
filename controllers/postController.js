@@ -114,9 +114,44 @@ const updatePost = async (req, res) => {
   }
 };
 
+const deletePost = async (req, res) => {
+  // I assume I need to delete comments associated with posts here too?
+  try {
+    const postId = parseInt(req.params.id);
+
+    const checkPost = await pool.query("SELECT * FROM posts WHERE id = $1", [postId]);
+
+    if (checkPost.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Post Not Found",
+        message: `No post found with id ${postId}`,
+      });
+    }
+
+    // Delete any associated comments first
+    // await pool.query("DELETE FROM comments WHERE post_id = $1", [postId]);
+
+    await pool.query("DELETE FROM posts WHERE id = $1", [postId]);
+
+    res.status(200).json({
+      success: true,
+      message: "Post Deleted Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllPosts,
   getPost,
   createNewPost,
   updatePost,
+  deletePost,
 };
