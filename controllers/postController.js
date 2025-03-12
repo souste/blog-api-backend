@@ -19,7 +19,7 @@ const getAllPosts = async (req, res) => {
 
 const getPost = async (req, res) => {
   try {
-    const postId = req.params.id;
+    const postId = parseInt(req.params.id);
     const result = await pool.query("SELECT * FROM posts WHERE id = $1", [postId]);
 
     if (result.rows.length === 0) {
@@ -78,8 +78,45 @@ const createNewPost = async (req, res) => {
   }
 };
 
+const updatePost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const { title, content } = req.body;
+
+    const checkPost = await pool.query("SELECT * FROM posts WHERE id = $1", [postId]);
+
+    if (checkPost.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Post Not Found",
+        message: `No post found with id ${postId}`,
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE posts
+            SET title = $1, content = $2 WHERE id = $3 RETURNING *`,
+      [title, content, postId]
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.rows[0],
+      message: "Post Updated Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllPosts,
   getPost,
   createNewPost,
+  updatePost,
 };
