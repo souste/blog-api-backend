@@ -124,9 +124,7 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    await pool.query("DELETE FROM posts WHERE id = $1", [userId]);
-
-    await pool.query("DELETE FROM users WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
 
     res.status(200).json({
       success: true,

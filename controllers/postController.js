@@ -129,9 +129,6 @@ const deletePost = async (req, res) => {
       });
     }
 
-    // Delete any associated comments first
-    // await pool.query("DELETE FROM comments WHERE post_id = $1", [postId]);
-
     await pool.query("DELETE FROM posts WHERE id = $1", [postId]);
 
     res.status(200).json({
