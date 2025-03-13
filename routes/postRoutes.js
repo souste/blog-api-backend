@@ -12,5 +12,6 @@ router.delete("/:id", postController.deletePost);
 router.get("/:postId/comments", commentController.getAllCommentsByPost);
 router.get("/:postId/comments/:id", commentController.getCommentByPost);
 router.post("/:postId/comments", commentController.createNewCommentByPost);
+router.patch("/:postId/comments/:id", commentController.updateCommentByPost);
 
 module.exports = router;
