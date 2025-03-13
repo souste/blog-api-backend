@@ -1,5 +1,7 @@
 const pool = require("../db/pool");
 
+// Could probably do some refactoring of repeated code here.
+
 const getAllCommentsByPost = async (req, res) => {
   try {
     const postId = req.params.postId;
@@ -98,28 +100,13 @@ const updateCommentByPost = async (req, res) => {
     const commentId = req.params.id;
     const content = req.body.content;
 
-    const postCheck = await pool.query("SELECT id FROM posts WHERE id = $1", [postId]);
-
-    if (postCheck.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: "Post Not Found",
-        message: `No post found with ID ${postId}`,
-      });
-    }
-
-    const commentCheck = await pool.query("SELECT id FROM comments WHERE id = $1", [commentId]);
+    const commentCheck = await pool.query("SELECT id FROM comments WHERE id = $1 AND post_id = $2", [
+      commentId,
+      postId,
+    ]);
 
     if (commentCheck.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: "Comment Not Found",
-        message: `No comment found with ID ${commentId}`,
-      });
-    }
-
-    if (commentCheck.rows[0].post_id !== postId) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         error: "Incorrect Post for Updating Comment",
         message: `Comment with ID ${commentId} does not belong to Post ID ${postId}`,
@@ -146,9 +133,44 @@ const updateCommentByPost = async (req, res) => {
   }
 };
 
+const deleteCommentByPost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.postId);
+    const commentId = req.params.id;
+
+    const commentCheck = await pool.query("SELECT id, post_id FROM comments WHERE id = $1 AND post_id = $2", [
+      commentId,
+      postId,
+    ]);
+
+    if (commentCheck.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Incorrect Post for deleting comment",
+        message: `Comment with ID ${commentId} does not belong to Post ID ${postId}`,
+      });
+    }
+
+    await pool.query("DELETE FROM comments WHERE id = $1", [commentId]);
+
+    res.status(200).json({
+      success: true,
+      message: "Comment Deleted Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllCommentsByPost,
   getCommentByPost,
   createNewCommentByPost,
   updateCommentByPost,
+  deleteCommentByPost,
 };
