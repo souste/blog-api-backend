@@ -49,6 +49,8 @@ const seedDB = async () => {
         INSERT INTO comments (content, timestamp, updated_at, user_id, post_id)
         VALUES
       ('This battle was a nightmare. I barely made it out alive.', NOW(), NOW(), 1, 1),
+      ('This battle was a nightmare2. I barely made it out alive2.', NOW(), NOW(), 1, 1),
+      ('This battle was a nightmare3. I barely made it out alive3.', NOW(), NOW(), 1, 1),
       ('Henry, you owe me another hunting trip!', NOW(), NOW(), 2, 2),
       ('I never expected that from Father Godwin... what a sermon!', NOW(), NOW(), 6, 3),
       ('The monastery is full of secrets... you should investigate.', NOW(), NOW(), 12, 4),
