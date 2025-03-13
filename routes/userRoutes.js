@@ -1,9 +1,11 @@
-// {
-//     "first_name": "Ranjeev",
-//     "last_name": "Lakhan",
-//     "username": "JeevyJeev",
-//     "email": "jeevy@jeevmail.com",
-//     "password": "jeevy82",
-//     "role": "user",
-//     "created_at": "2025-03-12 11:18:16.245011"
-// }
+const { Router } = require("express");
+const router = Router();
+const userController = require("../controllers/userController");
+
+router.get("/", userController.getAllUsers);
+router.get("/:id", userController.getUser);
+router.post("/", userController.createNewUser);
+router.patch("/:id", userController.updateUser);
+router.delete("/:id", userController.deleteUser);
+
+module.exports = router;
