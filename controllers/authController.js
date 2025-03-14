@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
+const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret-key";
+
 const alphaErr = "must only contain letters";
 const lengthErr = "must be between 8 and 20 characters";
 
@@ -22,6 +24,11 @@ const validateUser = [
     }),
 ];
 
+const validateLogin = [
+  body("email").trim().isEmail().withMessage("Invalid Email Format").normalizeEmail(),
+  body("password").trim().notEmpty().withMessage("Password is required"),
+];
+
 const createNewUser = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -30,7 +37,16 @@ const createNewUser = async (req, res) => {
     });
   }
   try {
-    const { first_name, last_name, username, email, password } = req.body;
+    const { first_name, last_name, username, email } = req.body;
+
+    const userExists = await pool.query("SELECT * FROM users WHERE email = $1 OR username = $2", [email, username]);
+
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User with that email already exists",
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
@@ -39,9 +55,19 @@ const createNewUser = async (req, res) => {
               VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [first_name, last_name, username, email, hashedPassword]
     );
+
+    const payload = {
+      user: {
+        id: result.rows[0].id,
+        username: result.rows[0].username,
+      },
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+
     res.status(201).json({
       success: true,
-      data: result.rows[0],
+      data: { user: result.rows[0], token },
       message: "User Created Successfully",
     });
   } catch (err) {
@@ -53,15 +79,6 @@ const createNewUser = async (req, res) => {
     });
   }
 };
-
-// const loginUser = async (req, res) => {
-// need to apply bcrypt compare here
-//   const user = "jeevy";
-//   const token = await jwt.sign({ user }, "secretkey", { expiresIn: "1h" });
-//   res.json({
-//     token,
-//   });
-// };
 
 module.exports = {
   validateUser,
