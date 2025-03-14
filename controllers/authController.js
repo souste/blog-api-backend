@@ -1,4 +1,6 @@
 const pool = require("../db/pool");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const createNewUser = async (req, res) => {
   try {
@@ -11,10 +13,13 @@ const createNewUser = async (req, res) => {
         message: "All fields are required",
       });
     }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
     const result = await pool.query(
       `INSERT INTO users (first_name, last_name, username, email, password)
               VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [first_name, last_name, username, email, password]
+      [first_name, last_name, username, email, hashedPassword]
     );
     res.status(201).json({
       success: true,
@@ -31,6 +36,15 @@ const createNewUser = async (req, res) => {
   }
 };
 
+// const loginUser = async (req, res) => {
+//   const user = "jeevy";
+//   const token = await jwt.sign({ user }, "secretkey", { expiresIn: "1h" });
+//   res.json({
+//     token,
+//   });
+// };
+
 module.exports = {
   createNewUser,
+  loginUser,
 };
