@@ -80,8 +80,69 @@ const createNewUser = async (req, res) => {
   }
 };
 
+const loginUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
+
+  try {
+    const { email, password } = req.body;
+
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const user = result.rows[0];
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const payload = {
+      user: {
+        id: user.id,
+        username: user.username,
+      },
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+
+    const { password: _, ...userData } = user;
+
+    res.json({
+      success: true,
+      data: {
+        user: userData,
+        token,
+      },
+      message: "Login Successful",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   validateUser,
+  validateLogin,
   createNewUser,
-  //   loginUser,
+  loginUser,
 };
