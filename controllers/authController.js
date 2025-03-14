@@ -1,18 +1,36 @@
 const pool = require("../db/pool");
 const bcrypt = require("bcryptjs");
+const { body, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
+const alphaErr = "must only contain letters";
+const lengthErr = "must be between 8 and 20 characters";
+
+const validateUser = [
+  body("first_name").trim().isAlpha().withMessage(`First name ${alphaErr}`),
+  body("last_name").trim().isAlpha().withMessage(`Last Name ${alphaErr}`),
+  body("username").trim().notEmpty().withMessage("Username is required"),
+  body("email").trim().isEmail().withMessage("Invalid Email Format").normalizeEmail(),
+  body("password").trim().isLength({ min: 8, max: 20 }).withMessage(`Password ${lengthErr}`),
+  body("confirm_password")
+    .trim()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords don't match");
+      }
+      return true;
+    }),
+];
+
 const createNewUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
   try {
     const { first_name, last_name, username, email, password } = req.body;
-
-    if (!first_name || !last_name || !username || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: "Bad Request",
-        message: "All fields are required",
-      });
-    }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
@@ -37,6 +55,7 @@ const createNewUser = async (req, res) => {
 };
 
 // const loginUser = async (req, res) => {
+// need to apply bcrypt compare here
 //   const user = "jeevy";
 //   const token = await jwt.sign({ user }, "secretkey", { expiresIn: "1h" });
 //   res.json({
@@ -45,6 +64,7 @@ const createNewUser = async (req, res) => {
 // };
 
 module.exports = {
+  validateUser,
   createNewUser,
-  loginUser,
+  //   loginUser,
 };
