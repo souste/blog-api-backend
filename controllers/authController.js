@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
 const alphaErr = "must only contain letters";
 const lengthErr = "must be between 8 and 20 characters";
