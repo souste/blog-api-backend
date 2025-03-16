@@ -17,3 +17,5 @@ if (process.env.DATABASE_URL) {
     port: process.env.DB_PORT,
   });
 }
+
+module.exports = pool;
