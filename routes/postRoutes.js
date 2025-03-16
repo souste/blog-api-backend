@@ -17,6 +17,7 @@ router.patch("/:postId/comments/:id", commentController.updateCommentByPost);
 router.delete("/:postId/comments/:id", commentController.deleteCommentByPost);
 
 // If I want to protect any routes:
+// This still needs to be tested on Postman via the token and make sure releavant error handling in route controller
 // router.post("/", auth, postController.getAllPosts);
 
 module.exports = router;
