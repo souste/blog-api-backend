@@ -20,7 +20,10 @@ const getAllPosts = async (req, res) => {
 const getPost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
-    const result = await pool.query("SELECT * FROM posts WHERE id = $1", [postId]);
+    const result = await pool.query(
+      "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.id WHERE posts.id = $1",
+      [postId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
