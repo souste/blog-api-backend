@@ -5,7 +5,10 @@ const pool = require("../db/pool");
 const getAllCommentsByPost = async (req, res) => {
   try {
     const postId = req.params.postId;
-    const result = await pool.query("SELECT * FROM comments WHERE post_id = $1", [postId]);
+    const result = await pool.query(
+      "SELECT comments.*, users.username FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = $1",
+      [postId]
+    );
     res.status(200).json({
       success: true,
       data: result.rows,
@@ -35,7 +38,10 @@ const getCommentByPost = async (req, res) => {
       });
     }
 
-    const result = await pool.query("SELECT * FROM comments WHERE post_Id = $1 AND id = $2", [postId, commentId]);
+    const result = await pool.query(
+      "SELECT comments.*, users.username FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = $1 AND comments.id = $2",
+      [postId, commentId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
