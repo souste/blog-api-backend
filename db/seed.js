@@ -27,7 +27,8 @@ const seedDB = async () => {
         ('Otto', 'von Bergow', 'ottber', 'otto@outlook.com', 'woof123', 'user', NOW()),
         ('Istvan', 'Toth', 'isttoh', 'toth@outlook.com', 'woof123', 'admin', NOW()),
         ('Johanka', 'of Sasau', 'johanka', 'johanka@outlook.com', 'woof123', 'user', NOW()),
-        ('Theresa', 'of Skalitz', 'theresa', 'theresa@outlook.com', 'woof123', 'user', NOW())
+        ('Theresa', 'of Skalitz', 'theresa', 'theresa@outlook.com', 'woof123', 'user', NOW()),
+        ('Anonymous', 'User', 'anonymous', 'anon@outlook.com', 'anon123', 'user', NOW())
       `);
 
     await pool.query(`
