@@ -68,14 +68,17 @@ const getCommentByPost = async (req, res) => {
 const createNewCommentByPost = async (req, res) => {
   try {
     const postId = req.params.postId;
-    const { content, user_id } = req.body;
-    // Will need to change user_id from a form input when working on the front end
+    let { content, user_id } = req.body;
 
-    if (!content || !user_id) {
+    if (!user_id || user_id === "Non Member") {
+      user_id = null;
+    }
+
+    if (!content) {
       return res.status(400).json({
         success: false,
         error: "Bad Request",
-        message: "Content (and User ID) required",
+        message: "Content is required",
       });
     }
 
