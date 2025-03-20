@@ -4,9 +4,12 @@ const cors = require("cors");
 
 const app = express();
 
+const allowedOrigins = ["http://localhost:5173", "https://souste-blog-api.netlify.app"];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
+    credentials: true,
   })
 );
 
